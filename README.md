@@ -2,6 +2,8 @@
 
 A mobile-first web app for keeping track of your clothes across several wardrobes: at home, at the summer cottage, at your parents' place.
 
+**Use it:** https://wardrobe-psi-ten.vercel.app/ (open it on your phone and choose **Add to Home Screen**). Everyone who opens it gets their own wardrobe, stored only in their own browser.
+
 - **Wardrobes:** every piece of clothing is in exactly one wardrobe (or bag), so you always know where it is. Tap the wardrobe name at the top of the Wardrobe tab to switch wardrobes, see all of them grouped by wardrobe, or add, rename and delete wardrobes. To move a piece, edit it and pick another wardrobe, or move several at once with a bag.
 - **Bags:** pack clothes into a bag when you go on a trip or move clothes between wardrobes. In the Bags tab, create a bag, then tap pieces (or a whole outfit) from any wardrobe to pack them. Packed clothes leave their wardrobe and are in the bag until you unpack them, either back where each came from or all into one wardrobe. On a trip, switch to the bag in the Wardrobe tab, and Choose outfit offers what's in it.
 - **Sample clothes:** on first launch an empty wardrobe is filled with 8 illustrated sample items and 2 outfits, each marked "Sample", plus a sample "Summer cottage" wardrobe, so you can try everything out. Tap "Remove samples" in the banner to delete them all, or delete them one by one. "Try with sample clothes" on the empty wardrobe brings them back.
@@ -41,7 +43,13 @@ npm run build     # type-checks and outputs static files to dist/
 npm run preview
 ```
 
-`dist/` is a static site that can be hosted anywhere (Netlify, GitHub Pages, Vercel, etc.). Serve it over **https** so the live camera works on desktop browsers.
+`dist/` is a static site that can be hosted anywhere (Netlify, GitHub Pages, Vercel, etc.). Serve it over **https** so the live camera works on desktop browsers. Cloudflare Pages won't work: its 25 MiB per-file limit is smaller than the background-removal runtime (`ort-wasm-*.wasm`, about 27 MB).
+
+## Deployment
+
+The app is deployed on Vercel at https://wardrobe-psi-ten.vercel.app/. The Vercel project is connected to this GitHub repo, so every push to `main` builds and deploys a new version automatically. Vercel detects Vite and needs no extra settings or environment variables.
+
+Data isn't shared between devices or people: each browser keeps its own wardrobe. Items added on `localhost` or on `npm run serve` don't appear on the Vercel URL. Move them with **Settings → Backup** and **Restore**.
 
 ## Run it from this computer
 
