@@ -45,6 +45,15 @@ npm run preview
 
 `dist/` is a static site that can be hosted anywhere (Netlify, GitHub Pages, Vercel, etc.). Serve it over **https** so the live camera works on desktop browsers. Cloudflare Pages won't work: its 25 MiB per-file limit is smaller than the background-removal runtime (`ort-wasm-*.wasm`, about 27 MB).
 
+## Tests
+
+```bash
+npm test          # runs the unit tests once (Vitest)
+npm run test:watch
+```
+
+GitHub Actions runs the tests and the build on every push to `main` and on pull requests (`.github/workflows/ci.yml`).
+
 ## Deployment
 
 The app is deployed on Vercel at https://wardrobe-psi-ten.vercel.app/. The Vercel project is connected to this GitHub repo, so every push to `main` builds and deploys a new version automatically. Vercel detects Vite and needs no extra settings or environment variables.
