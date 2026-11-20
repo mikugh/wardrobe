@@ -1,3 +1,4 @@
 node_modules/
 # Build output (rebuild with `npm run build`)
 dist/
+.claude/
