@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+  }
+  input[type='search']::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex h-11 select-none items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 text-sm font-semibold transition active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-white hover:bg-accent-dark;
+  }
+  .btn-ghost {
+    @apply btn bg-stone-100 text-ink hover:bg-stone-200;
+  }
+  .icon-btn {
+    @apply inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition hover:bg-stone-100;
+  }
+  .chip {
+    @apply inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-sm transition;
+  }
+  .chip-on {
+    @apply border-ink bg-ink text-white;
+  }
+  .chip-off {
+    @apply border-stone-200 bg-white text-stone-700 hover:border-stone-300;
+  }
+  /* 16px text stops iOS Safari from zooming into inputs. */
+  .field {
+    @apply h-11 w-full rounded-xl border border-stone-200 bg-white px-3.5 text-[16px] outline-none transition placeholder:text-stone-400 focus:border-accent focus:ring-2 focus:ring-accent/20;
+  }
+  .label {
+    @apply mb-2 block text-xs font-semibold uppercase tracking-wide text-stone-500;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
