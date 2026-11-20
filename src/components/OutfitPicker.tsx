@@ -194,12 +194,12 @@ function Picker({
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-paper">
-      <header className="flex items-center gap-2 border-b border-stone-200 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <header className="flex items-center gap-2 border-b border-line px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <button className="icon-btn -ml-2" onClick={onClose} aria-label="Close">
           <XIcon />
         </button>
-        <h2 className="flex-1 truncate font-display text-xl font-semibold">Choose outfit</h2>
-        <button className="btn-ghost h-9 px-3.5" onClick={shuffle}>
+        <h2 className="flex-1 truncate font-display text-[1.375rem] font-medium leading-tight">Choose outfit</h2>
+        <button className="btn-ghost px-4" onClick={shuffle}>
           <ShuffleIcon size={16} /> Shuffle
         </button>
       </header>
@@ -212,7 +212,7 @@ function Picker({
               <select
                 value={placeId}
                 onChange={(e) => onPlaceChange(e.target.value)}
-                className="chip chip-off appearance-none pr-3.5 font-medium text-ink"
+                className="chip chip-off appearance-none font-medium text-ink"
                 aria-label="Clothes from"
               >
                 {wardrobes.map((w) => (
@@ -254,13 +254,13 @@ function Picker({
 
           {hasDresses && hasSeparates && (
             <div className="mt-4 flex justify-center">
-              <div className="inline-flex rounded-full bg-stone-100 p-1 text-sm font-medium">
+              <div className="inline-flex rounded-full bg-stone-900/[0.06] p-1 text-sm font-medium">
                 {(['separates', 'dress'] as Mode[]).map((m) => (
                   <button
                     key={m}
                     onClick={() => setMode(m)}
                     aria-pressed={mode === m}
-                    className={`rounded-full px-4 py-1.5 transition ${mode === m ? 'bg-white text-ink shadow-sm' : 'text-stone-500'}`}
+                    className={`h-10 rounded-full px-4 transition duration-200 ${mode === m ? 'bg-white text-ink shadow-card' : 'text-stone-500 hover:text-ink'}`}
                   >
                     {m === 'separates' ? 'Top & bottoms' : 'Dress'}
                   </button>
@@ -271,7 +271,7 @@ function Picker({
 
           <p className="mb-2 mt-4 text-center text-xs text-stone-500">Swipe each piece sideways to try alternatives.</p>
 
-          <div className="rounded-3xl bg-white px-2 py-5 ring-1 ring-stone-200">
+          <div className="rounded-3xl bg-white px-2 py-5 shadow-card">
             <div className="flex flex-col gap-2">
               {rows.map((row) => (
                 <div key={row.join()} className="flex w-full gap-2">
@@ -280,7 +280,7 @@ function Picker({
               ))}
             </div>
             {byLane.extras.length > 0 && (
-              <div className={rows.length ? 'mt-5 border-t border-stone-100 pt-4' : ''}>
+              <div className={rows.length ? 'mt-5 border-t border-line pt-4' : ''}>
                 <p className="label text-center">Accessories</p>
                 {laneView('extras')}
               </div>
@@ -291,7 +291,7 @@ function Picker({
         </div>
       </div>
 
-      <footer className="border-t border-stone-200 bg-paper px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+      <footer className="border-t border-line bg-paper px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <MixedPlacesWarning items={selected} compact className="mx-auto mb-3 max-w-md py-2.5" />
         {naming ? (
           <form className="mx-auto flex max-w-md gap-2" onSubmit={save}>
@@ -402,7 +402,7 @@ function LaneCarousel({
             {item ? (
               <Piece item={item} />
             ) : (
-              <div className="flex h-full w-full max-w-[9rem] items-center justify-center rounded-2xl border-2 border-dashed border-stone-200 px-2 text-center text-xs text-stone-400">
+              <div className="flex h-full w-full max-w-[9rem] items-center justify-center rounded-2xl border-[1.5px] border-dashed border-stone-300/70 bg-white/40 px-2 text-center text-xs text-stone-400">
                 {none}
               </div>
             )}
@@ -425,7 +425,7 @@ function ArrowButton({ side, label, onClick }: { side: 'left' | 'right'; label: 
     <button
       onClick={onClick}
       aria-label={label}
-      className={`absolute top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-stone-600 shadow ring-1 ring-black/5 transition hover:text-ink [@media(hover:hover)]:flex ${
+      className={`absolute top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-stone-600 shadow-card backdrop-blur transition hover:text-ink [@media(hover:hover)]:flex ${
         side === 'left' ? 'left-0' : 'right-0'
       }`}
     >

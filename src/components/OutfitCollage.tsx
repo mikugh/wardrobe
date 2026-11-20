@@ -44,21 +44,21 @@ export function OutfitCollage({ items, className = '' }: { items: ClothingItem[]
   const shown = sorted.slice(0, 4)
   const extra = sorted.length - shown.length
 
-  if (!shown.length) return <div className={`aspect-square rounded-2xl bg-stone-100 ${className}`} />
+  if (!shown.length) return <div className={`aspect-square rounded-2xl bg-sand ${className}`} />
 
   const layout =
     shown.length === 1 ? 'grid-cols-1' : shown.length === 2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'
 
   return (
-    <div className={`grid aspect-square gap-1 overflow-hidden rounded-2xl bg-white p-1 ring-1 ring-black/5 ${layout} ${className}`}>
+    <div className={`grid aspect-square gap-1 overflow-hidden rounded-2xl bg-white p-1 shadow-card transition duration-300 ease-out group-hover:-translate-y-0.5 group-hover:shadow-lift ${layout} ${className}`}>
       {shown.map((item, i) => (
         <div
           key={item.id}
-          className={`relative overflow-hidden rounded-xl bg-stone-100 ${shown.length === 3 && i === 0 ? 'row-span-2' : ''}`}
+          className={`relative overflow-hidden rounded-xl bg-sand ${shown.length === 3 && i === 0 ? 'row-span-2' : ''}`}
         >
           <ItemThumb item={item} />
           {extra > 0 && i === shown.length - 1 && (
-            <span className="absolute inset-0 flex items-center justify-center bg-ink/50 text-lg font-semibold text-white">
+            <span className="absolute inset-0 flex items-center justify-center bg-ink/45 font-display text-xl font-medium text-white backdrop-blur-[2px]">
               +{extra}
             </span>
           )}

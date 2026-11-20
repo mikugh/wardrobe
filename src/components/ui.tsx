@@ -20,7 +20,7 @@ export function useBlobUrl(blob: Blob | null | undefined): string | undefined {
 
 export function BlobImg({ blob, alt, className }: { blob: Blob | null | undefined; alt: string; className?: string }) {
   const url = useBlobUrl(blob)
-  if (!url) return <div className={`bg-stone-100 ${className ?? ''}`} />
+  if (!url) return <div className={`bg-sand ${className ?? ''}`} />
   return <img src={url} alt={alt} className={className} draggable={false} />
 }
 
@@ -80,20 +80,24 @@ export function Sheet({ title, onClose, children, footer, tall, headerAction }: 
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative flex max-h-[94dvh] w-full animate-sheet flex-col rounded-t-3xl bg-paper shadow-2xl md:max-w-xl md:rounded-3xl ${
+        className={`relative flex max-h-[94dvh] w-full animate-sheet flex-col overflow-hidden rounded-t-[28px] bg-paper shadow-sheet md:max-w-xl md:animate-dialog md:rounded-[28px] md:shadow-lift ${
           tall ? 'h-[94dvh] md:h-[88dvh]' : ''
         }`}
       >
-        <header className="flex items-center gap-2 px-5 pb-2 pt-4">
-          <h2 className="min-w-0 flex-1 truncate font-display text-xl font-semibold">{title}</h2>
+        {/* Grabber: a visual cue that this is a sheet on phones. */}
+        <span aria-hidden="true" className="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full bg-stone-300/80 md:hidden" />
+        <header className="flex items-center gap-1 px-5 pb-3 pt-2 md:pt-5">
+          <h2 className="min-w-0 flex-1 truncate font-display text-[1.375rem] font-medium leading-tight">{title}</h2>
           {headerAction}
-          <button type="button" onClick={onClose} aria-label="Close" className="icon-btn -mr-2">
-            <XIcon />
+          <button type="button" onClick={onClose} aria-label="Close" className="icon-btn -mr-2 text-stone-500 hover:bg-transparent hover:text-ink">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-900/[0.06] transition hover:bg-stone-900/10">
+              <XIcon size={16} />
+            </span>
           </button>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-6">{children}</div>
         {footer && (
-          <div className="border-t border-stone-200 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">{footer}</div>
+          <div className="border-t border-line px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">{footer}</div>
         )}
       </div>
     </div>
@@ -115,16 +119,16 @@ export function Switch({
   className?: string
 }) {
   return (
-    <label className={`flex cursor-pointer items-start gap-3 rounded-2xl bg-white p-4 ring-1 ring-stone-200 ${className}`}>
+    <label className={`flex cursor-pointer items-start gap-3 rounded-2xl bg-white p-4 shadow-card ${className}`}>
       <span className="min-w-0 flex-1 text-sm">
         <span className="block font-semibold text-ink">{title}</span>
-        {description && <span className="mt-0.5 block text-stone-500">{description}</span>}
+        {description && <span className="mt-0.5 block leading-relaxed text-stone-500">{description}</span>}
       </span>
       <input type="checkbox" role="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
       {/* Track and knob */}
       <span
         aria-hidden="true"
-        className="relative mt-0.5 h-7 w-12 shrink-0 rounded-full bg-stone-300 transition after:absolute after:left-0.5 after:top-0.5 after:h-6 after:w-6 after:rounded-full after:bg-white after:shadow after:transition peer-checked:bg-accent peer-checked:after:translate-x-5 peer-focus-visible:ring-2 peer-focus-visible:ring-accent/40"
+        className="relative mt-0.5 h-7 w-12 shrink-0 rounded-full bg-stone-300 shadow-[inset_0_1px_2px_rgb(28_25_23/0.12)] transition duration-300 ease-out after:absolute after:left-0.5 after:top-0.5 after:h-6 after:w-6 after:rounded-full after:bg-white after:shadow-[0_1px_3px_rgb(28_25_23/0.25)] after:transition after:duration-300 after:ease-out peer-checked:bg-accent peer-checked:after:translate-x-5 peer-focus-visible:ring-2 peer-focus-visible:ring-accent/40"
       />
     </label>
   )
@@ -133,7 +137,7 @@ export function Switch({
 export function Spinner({ label }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-16 text-sm text-stone-500">
-      <span className="h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-accent" />
+      <span className="h-7 w-7 animate-spin rounded-full border-[1.5px] border-stone-200 border-t-accent" />
       {label}
     </div>
   )
@@ -154,5 +158,39 @@ export function Chip({
     <button type="button" aria-pressed={active} onClick={onClick} className={`chip ${active ? 'chip-on' : 'chip-off'} ${className}`}>
       {children}
     </button>
+  )
+}
+
+/** Centered illustration, title, text and optional actions for a screen with nothing to show. */
+export function EmptyState({
+  icon,
+  art,
+  title,
+  children,
+  actions,
+  className = 'mt-14',
+}: {
+  icon?: ReactNode
+  /** Replaces the icon medallion with custom artwork. */
+  art?: ReactNode
+  title: ReactNode
+  children?: ReactNode
+  actions?: ReactNode
+  className?: string
+}) {
+  return (
+    <div className={`mx-auto max-w-sm animate-rise text-center ${className}`}>
+      {art ??
+        (icon && (
+          <span className="relative mx-auto flex h-20 w-20 items-center justify-center">
+            <span aria-hidden="true" className="absolute inset-0 rounded-full bg-accent-light" />
+            <span aria-hidden="true" className="absolute inset-2 rounded-full bg-white shadow-card" />
+            <span className="relative text-accent">{icon}</span>
+          </span>
+        ))}
+      <h2 className="mt-7 text-balance font-display text-[1.625rem] font-medium leading-tight text-ink">{title}</h2>
+      {children && <p className="mx-auto mt-2.5 max-w-xs text-pretty text-[15px] leading-relaxed text-stone-500">{children}</p>}
+      {actions && <div className="mt-7 flex flex-col items-center gap-3">{actions}</div>}
+    </div>
   )
 }

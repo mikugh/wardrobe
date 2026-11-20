@@ -77,11 +77,11 @@ export function OutfitBuilder({ initial, onClose }: { initial?: Outfit; onClose:
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-paper">
-      <header className="flex items-center gap-2 border-b border-stone-200 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <header className="flex items-center gap-2 border-b border-line px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <button className="icon-btn -ml-2" onClick={onClose} aria-label="Close">
           <XIcon />
         </button>
-        <h2 className="flex-1 truncate font-display text-xl font-semibold">{initial ? 'Edit outfit' : 'New outfit'}</h2>
+        <h2 className="flex-1 truncate font-display text-[1.375rem] font-medium leading-tight">{initial ? 'Edit outfit' : 'New outfit'}</h2>
       </header>
 
       <div className="mx-auto w-full max-w-3xl min-h-0 flex-1 overflow-y-auto px-4 pb-6">
@@ -89,7 +89,7 @@ export function OutfitBuilder({ initial, onClose }: { initial?: Outfit; onClose:
           <select
             value={season}
             onChange={(e) => setSeason(e.target.value as Season | 'all')}
-            className="chip chip-off appearance-none pr-3.5"
+            className="chip chip-off appearance-none"
             aria-label="Season"
           >
             <option value="all">Any season</option>
@@ -99,7 +99,7 @@ export function OutfitBuilder({ initial, onClose }: { initial?: Outfit; onClose:
               </option>
             ))}
           </select>
-          <button className="btn-ghost h-9 px-3.5" onClick={shuffle} disabled={!canShuffle}>
+          <button className="btn-ghost px-4" onClick={shuffle} disabled={!canShuffle}>
             <ShuffleIcon size={16} /> Shuffle
           </button>
         </div>
@@ -107,14 +107,14 @@ export function OutfitBuilder({ initial, onClose }: { initial?: Outfit; onClose:
         {/* The outfit being composed */}
         <section className="py-4">
           {selectedItems.length === 0 ? (
-            <div className="flex h-36 items-center justify-center rounded-2xl border-2 border-dashed border-stone-200 px-6 text-center text-sm text-stone-500">
+            <div className="flex h-36 items-center justify-center rounded-2xl border-[1.5px] border-dashed border-stone-300/70 bg-white/40 px-6 text-center text-sm text-stone-500">
               Tap pieces below to put an outfit together, or hit Shuffle for a suggestion.
             </div>
           ) : (
             <ul className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 pt-2">
               {selectedItems.map((item) => (
                 <li key={item.id} className="relative w-28 shrink-0 sm:w-32">
-                  <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-stone-100 ring-1 ring-black/5">
+                  <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-sand ring-1 ring-black/[0.04]">
                     <ItemThumb item={item} />
                   </div>
                   <button
@@ -152,7 +152,7 @@ export function OutfitBuilder({ initial, onClose }: { initial?: Outfit; onClose:
                       onClick={() => toggle(item)}
                       aria-pressed={on}
                       aria-label={item.name}
-                      className={`relative block aspect-[3/4] w-full overflow-hidden rounded-xl bg-stone-100 transition ${
+                      className={`relative block aspect-[3/4] w-full overflow-hidden rounded-xl bg-sand transition ${
                         on ? 'ring-[3px] ring-accent ring-offset-2 ring-offset-paper' : 'ring-1 ring-black/5 hover:opacity-90'
                       }`}
                     >
@@ -171,7 +171,7 @@ export function OutfitBuilder({ initial, onClose }: { initial?: Outfit; onClose:
         ))}
       </div>
 
-      <footer className="border-t border-stone-200 bg-paper px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+      <footer className="border-t border-line bg-paper px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <div className="mx-auto flex max-w-3xl gap-2">
           <input
             className="field flex-1"

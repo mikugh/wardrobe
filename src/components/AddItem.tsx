@@ -110,13 +110,13 @@ function SourceButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition active:scale-[0.99] ${
-        primary ? 'border-accent bg-accent-light hover:bg-[#f2dccf]' : 'border-stone-200 bg-white hover:border-stone-300'
+      className={`flex items-center gap-4 rounded-2xl p-4 text-left transition duration-200 active:scale-[0.99] ${
+        primary ? 'bg-accent-light shadow-[0_0_0_1px_rgb(180_88_58/0.35)] hover:bg-[#f2dccf]' : 'bg-white shadow-card hover:shadow-lift'
       }`}
     >
       <span
         className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${
-          primary ? 'bg-accent text-white' : 'bg-stone-100 text-ink'
+          primary ? 'bg-accent text-white shadow-button' : 'bg-sand text-ink'
         }`}
       >
         {icon}

@@ -140,7 +140,7 @@ export function ItemForm({ initial, photo: initialPhoto, detectedColor, submitLa
 
   return (
     <form id={formId} onSubmit={submit} className="space-y-6">
-      <div className="relative overflow-hidden rounded-2xl bg-stone-100">
+      <div className="relative overflow-hidden rounded-2xl bg-sand">
         <BlobImg blob={photo.image} alt="Item photo" className="mx-auto max-h-[40dvh] w-full object-contain" />
         {cutting ? (
           <CuttingOverlay progress={cutting} />
@@ -218,8 +218,8 @@ export function ItemForm({ initial, photo: initialPhoto, detectedColor, submitLa
                     colorHex: c.name === shade.name ? shade.hex : paletteHex(c.name),
                   }))
                 }
-                className={`flex h-9 items-center gap-2 rounded-full border pl-1.5 pr-3 text-sm transition ${
-                  active ? 'border-ink bg-ink text-white' : 'border-stone-200 bg-white hover:border-stone-300'
+                className={`flex h-11 items-center gap-2 rounded-full pl-2 pr-3.5 text-sm transition duration-200 sm:h-9 sm:pl-1.5 sm:pr-3 ${
+                  active ? 'bg-ink text-paper shadow-card' : 'bg-white shadow-hairline hover:bg-stone-50'
                 }`}
               >
                 <ColorDot name={c.name} hex={c.hex} size={22} />
@@ -321,8 +321,8 @@ export function ItemForm({ initial, photo: initialPhoto, detectedColor, submitLa
             type="button"
             aria-pressed={values.favorite}
             onClick={() => set('favorite', !values.favorite)}
-            className={`flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-sm font-medium transition ${
-              values.favorite ? 'border-accent bg-accent-light text-accent-dark' : 'border-stone-200 bg-white text-stone-600'
+            className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-medium transition duration-200 ${
+              values.favorite ? 'bg-accent-light text-accent-dark shadow-[0_0_0_1px_rgb(180_88_58/0.35)]' : 'bg-white text-stone-600 shadow-hairline'
             }`}
           >
             <HeartIcon size={18} fill={values.favorite ? 'currentColor' : 'none'} />
@@ -346,7 +346,7 @@ export function ItemForm({ initial, photo: initialPhoto, detectedColor, submitLa
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
       {/* Offset by the sheet's bottom padding so the bar sits flush with the sheet edge. */}
-      <div className="sticky -bottom-6 -mx-5 -mb-6 flex gap-3 border-t border-stone-200 bg-paper px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+      <div className="sticky -bottom-6 -mx-5 -mb-6 flex gap-3 border-t border-line bg-paper px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <button type="button" className="btn-ghost flex-1" onClick={onCancel} disabled={busy}>
           {cancelLabel}
         </button>
