@@ -5,7 +5,7 @@ import { useWardrobe } from '../store'
 import type { ClothingItem, Place } from '../types'
 import { BagIcon, CheckIcon, PencilIcon, PlusIcon, TrashIcon, WardrobeIcon, XIcon } from './icons'
 import { OutfitCollage, sortTopToToe } from './OutfitCollage'
-import { Chip, ItemThumb, Sheet, Spinner } from './ui'
+import { Chip, EmptyState, ItemThumb, Sheet, Spinner } from './ui'
 
 /** The Bags tab: bags for trips or for moving clothes between wardrobes. */
 export function BagsView() {
@@ -30,8 +30,8 @@ export function BagsView() {
     <div className="mx-auto max-w-6xl px-4 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-6">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Bags</h1>
-          {bags.length > 0 && <p className="mt-1 text-sm text-stone-500">{plural(bags.length, 'bag')}</p>}
+          <h1 className="font-display text-[2.125rem] font-medium leading-[1.1] sm:text-[2.75rem]">Bags</h1>
+          {bags.length > 0 && <p className="num mt-1.5 text-[13px] text-stone-500">{plural(bags.length, 'bag')}</p>}
         </div>
         {bags.length > 0 && (
           <button className="btn-primary mt-1 px-4" onClick={() => setCreating(true)}>
@@ -43,36 +43,35 @@ export function BagsView() {
       {loading ? (
         <Spinner />
       ) : bags.length === 0 ? (
-        <div className="mx-auto mt-14 max-w-sm text-center">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-light text-accent">
-            <BagIcon size={28} />
-          </span>
-          <h2 className="mt-6 font-display text-2xl font-semibold">No bags yet</h2>
-          <p className="mt-2 text-stone-500">
-            Pack clothes into a bag when you go on a trip, or to move them from one wardrobe to another. Packed clothes are
-            in the bag until you unpack them.
-          </p>
-          <button className="btn-primary mt-6" onClick={() => setCreating(true)}>
-            <PlusIcon size={18} /> Pack a bag
-          </button>
-        </div>
+        <EmptyState
+          icon={<BagIcon size={26} />}
+          title="No bags yet"
+          actions={
+            <button className="btn-primary" onClick={() => setCreating(true)}>
+              <PlusIcon size={18} /> Pack a bag
+            </button>
+          }
+        >
+          Pack clothes into a bag when you go on a trip, or to move them from one wardrobe to another. Packed clothes are in
+          the bag until you unpack them.
+        </EmptyState>
       ) : (
-        <ul className="mt-6 grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
-          {bags.map((bag) => {
+        <ul className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4">
+          {bags.map((bag, i) => {
             const packed = inside(bag)
             const from = [...new Set(packed.map((i) => placeName(i.packedFrom)).filter(Boolean))]
             return (
-              <li key={bag.id}>
+              <li key={bag.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                 <button className="group block w-full text-left" onClick={() => setOpenId(bag.id)}>
                   {packed.length ? (
                     <OutfitCollage items={packed} />
                   ) : (
-                    <div className="flex aspect-square items-center justify-center rounded-2xl border-2 border-dashed border-stone-200 text-stone-300">
+                    <div className="flex aspect-square items-center justify-center rounded-2xl border-[1.5px] border-dashed border-stone-300/70 bg-white/40 text-stone-300">
                       <BagIcon size={36} />
                     </div>
                   )}
-                  <p className="mt-2 truncate text-sm font-medium">{bag.name}</p>
-                  <p className="truncate text-xs text-stone-500">
+                  <p className="mt-2.5 truncate px-0.5 text-[14px] font-medium">{bag.name}</p>
+                  <p className="num mt-0.5 truncate px-0.5 text-xs text-stone-500">
                     {packed.length ? plural(packed.length, 'piece') : 'Empty'}
                     {from.length > 0 && <> · from {from.join(', ')}</>}
                   </p>
@@ -148,7 +147,7 @@ function BagView({ bagId, onClose }: { bagId: string; onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-paper">
-      <header className="flex items-center gap-2 border-b border-stone-200 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <header className="flex items-center gap-2 border-b border-line px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <button className="icon-btn -ml-2" onClick={onClose} aria-label="Close">
           <XIcon />
         </button>
@@ -156,20 +155,20 @@ function BagView({ bagId, onClose }: { bagId: string; onClose: () => void }) {
           <form onSubmit={rename} className="flex min-w-0 flex-1 gap-2">
             <input
               autoFocus
-              className="field h-10 min-w-0 flex-1"
+              className="field h-11 min-w-0 flex-1"
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={40}
               aria-label="Bag name"
             />
-            <button type="submit" className="btn-primary h-10 px-4">
+            <button type="submit" className="btn-primary px-4">
               Save
             </button>
           </form>
         ) : (
           <>
             <BagIcon size={20} className="shrink-0 text-accent" />
-            <h2 className="min-w-0 flex-1 truncate font-display text-xl font-semibold">{bag.name}</h2>
+            <h2 className="min-w-0 flex-1 truncate font-display text-[1.375rem] font-medium leading-tight">{bag.name}</h2>
             <button
               className="icon-btn text-stone-500"
               onClick={() => {
@@ -191,14 +190,14 @@ function BagView({ bagId, onClose }: { bagId: string; onClose: () => void }) {
         <section className="py-4">
           <h3 className="label">In the bag · {packed.length}</h3>
           {packed.length === 0 ? (
-            <div className="flex h-32 items-center justify-center rounded-2xl border-2 border-dashed border-stone-200 px-6 text-center text-sm text-stone-500">
+            <div className="flex h-32 items-center justify-center rounded-2xl border-[1.5px] border-dashed border-stone-300/70 bg-white/40 px-6 text-center text-sm text-stone-500">
               Tap clothes below to pack them. They move out of their wardrobe and into this bag.
             </div>
           ) : (
             <ul className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 pt-2">
               {packed.map((item) => (
                 <li key={item.id} className="relative w-24 shrink-0 sm:w-28">
-                  <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-stone-100 ring-1 ring-black/5">
+                  <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-sand ring-1 ring-black/[0.04]">
                     <ItemThumb item={item} />
                   </div>
                   <button
@@ -216,7 +215,7 @@ function BagView({ bagId, onClose }: { bagId: string; onClose: () => void }) {
           )}
         </section>
 
-        <section className="border-t border-stone-200 pt-4">
+        <section className="border-t border-line pt-4">
           <h3 className="label">Pack from</h3>
           <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
             {wardrobes.map((w) => (
@@ -263,7 +262,7 @@ function BagView({ bagId, onClose }: { bagId: string; onClose: () => void }) {
                       <button
                         onClick={() => packItems(bag.id, [item.id])}
                         aria-label={`Pack ${item.name}`}
-                        className="relative block aspect-[3/4] w-full overflow-hidden rounded-xl bg-stone-100 ring-1 ring-black/5 transition hover:opacity-90"
+                        className="relative block aspect-[3/4] w-full overflow-hidden rounded-xl bg-sand ring-1 ring-black/[0.04] transition hover:opacity-90"
                       >
                         <ItemThumb item={item} alt="" />
                         <span className="absolute bottom-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm">
@@ -280,7 +279,7 @@ function BagView({ bagId, onClose }: { bagId: string; onClose: () => void }) {
         </section>
       </div>
 
-      <footer className="border-t border-stone-200 bg-paper px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+      <footer className="border-t border-line bg-paper px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <div className="mx-auto flex max-w-3xl gap-2">
           <button className="btn-ghost flex-1" onClick={() => setUnpacking(true)} disabled={!packed.length}>
             Unpack…
@@ -335,10 +334,10 @@ function UnpackSheet({
   const option = (to: string | 'origin', title: string, subtitle: string) => (
     <button
       key={to}
-      className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left ring-1 ring-stone-200 transition hover:ring-stone-300"
+      className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 text-left shadow-card transition duration-200 hover:shadow-lift active:scale-[0.99]"
       onClick={() => onUnpack(to)}
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-600">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sand text-stone-600">
         <WardrobeIcon size={20} />
       </span>
       <span className="min-w-0">

@@ -47,7 +47,7 @@ export function WardrobeSwitcher({ onClose }: { onClose: () => void }) {
   }
 
   const nameForm = (place?: Place) => (
-    <form onSubmit={save} className="rounded-2xl bg-white p-3 ring-1 ring-stone-200">
+    <form onSubmit={save} className="rounded-2xl bg-white p-3 shadow-card">
       <input
         autoFocus
         className="field"
@@ -62,7 +62,7 @@ export function WardrobeSwitcher({ onClose }: { onClose: () => void }) {
         {place && (
           <button
             type="button"
-            className="icon-btn h-11 w-11 bg-stone-100 text-stone-600 hover:bg-red-50 hover:text-red-600"
+            className="icon-btn bg-white shadow-card text-stone-600 hover:bg-red-50 hover:text-red-600"
             onClick={() => remove(place)}
             aria-label="Delete wardrobe"
           >
@@ -157,10 +157,10 @@ function PlaceRow({
 }) {
   return (
     <div
-      className={`flex items-center gap-2 rounded-2xl bg-white p-2 pr-1 ring-1 transition ${active ? 'ring-2 ring-ink' : 'ring-stone-200'}`}
+      className={`flex items-center gap-2 rounded-2xl bg-white p-2 pr-1 transition duration-200 ${active ? 'shadow-[0_0_0_1.5px_theme(colors.ink),0_4px_12px_-6px_rgb(28_25_23/0.2)]' : 'shadow-card'}`}
     >
       <button className="flex min-w-0 flex-1 items-center gap-3 text-left" onClick={onClick} aria-pressed={active}>
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-600">{icon}</span>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sand text-stone-600">{icon}</span>
         <span className="min-w-0 flex-1">
           <span className="block truncate font-semibold">{title}</span>
           <span className="block text-xs text-stone-500">{plural(items.length, 'piece')}</span>
@@ -168,7 +168,7 @@ function PlaceRow({
         {/* A peek at what's inside */}
         <span className="flex shrink-0 gap-1" aria-hidden="true">
           {items.slice(0, 3).map((i) => (
-            <span key={i.id} className="h-11 w-8 overflow-hidden rounded-md bg-stone-100">
+            <span key={i.id} className="h-11 w-8 overflow-hidden rounded-md bg-sand">
               <ItemThumb item={i} alt="" />
             </span>
           ))}
@@ -176,7 +176,7 @@ function PlaceRow({
         {active && <CheckIcon size={18} className="shrink-0 text-ink" />}
       </button>
       {onEdit && (
-        <button className="icon-btn h-9 w-9 text-stone-500" onClick={onEdit} aria-label={`Rename or delete ${title}`}>
+        <button className="icon-btn text-stone-500" onClick={onEdit} aria-label={`Rename or delete ${title}`}>
           <PencilIcon size={16} />
         </button>
       )}

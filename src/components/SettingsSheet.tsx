@@ -64,7 +64,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         <Stat value={usage === null ? '—' : formatBytes(usage)} label="used" />
       </div>
 
-      <label className="mt-5 flex items-center gap-3 rounded-2xl bg-white p-4 ring-1 ring-stone-200">
+      <label className="mt-5 flex items-center gap-3 rounded-2xl bg-white p-4 shadow-card">
         <span className="min-w-0 flex-1 text-sm">
           <span className="block font-semibold text-ink">Currency</span>
           <span className="mt-0.5 block text-stone-500">For prices and cost per wear.</span>
@@ -72,7 +72,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         <select
           value={currency}
           onChange={(e) => setCurrency(e.target.value)}
-          className="chip chip-off appearance-none pr-3.5 font-medium"
+          className="chip chip-off appearance-none font-medium"
           aria-label="Currency"
         >
           {(CURRENCIES.includes(currency) ? CURRENCIES : [currency, ...CURRENCIES]).map((c) => (
@@ -83,7 +83,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         </select>
       </label>
 
-      <p className="mt-5 text-sm text-stone-600">
+      <p className="mt-6 text-sm leading-relaxed text-stone-600">
         Your wardrobe is stored only on this device, in this browser. Download a backup now and then. You can also use a
         backup to move your wardrobe to another phone or computer.
       </p>
@@ -125,7 +125,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         </p>
       )}
 
-      <div className="mt-6 rounded-2xl bg-white p-4 text-sm text-stone-600 ring-1 ring-stone-200">
+      <div className="mt-6 rounded-2xl bg-white p-4 text-sm text-stone-600 shadow-card">
         <p className="font-semibold text-ink">Use it like an app</p>
         <p className="mt-1">
           On your phone, open the browser menu and choose <em>Add to Home Screen</em> to get a full-screen wardrobe app
@@ -138,9 +138,9 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
 function Stat({ value, label }: { value: number | string; label: string }) {
   return (
-    <div className="rounded-2xl bg-white py-3 ring-1 ring-stone-200">
-      <div className="font-display text-2xl font-semibold">{value}</div>
-      <div className="text-xs text-stone-500">{label}</div>
+    <div className="card px-2 py-4">
+      <div className="num whitespace-nowrap font-display text-[1.5rem] font-medium leading-none">{value}</div>
+      <div className="mt-1.5 text-xs text-stone-500">{label}</div>
     </div>
   )
 }

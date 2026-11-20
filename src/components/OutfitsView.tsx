@@ -7,7 +7,7 @@ import { OutfitBuilder } from './OutfitBuilder'
 import { OutfitCollage } from './OutfitCollage'
 import { MixedPlacesWarning, OutfitFigure, PieceList, placeCount, tracksWear } from './OutfitFigure'
 import { OutfitPicker } from './OutfitPicker'
-import { Sheet, Spinner } from './ui'
+import { EmptyState, Sheet, Spinner } from './ui'
 
 export function OutfitsView() {
   const { items, outfits, loading } = useWardrobe()
@@ -30,8 +30,8 @@ export function OutfitsView() {
     <div className="mx-auto max-w-6xl px-4 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-6">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Outfits</h1>
-          {outfits.length > 0 && <p className="mt-1 text-sm text-stone-500">{plural(outfits.length, 'outfit')}</p>}
+          <h1 className="font-display text-[2.125rem] font-medium leading-[1.1] sm:text-[2.75rem]">Outfits</h1>
+          {outfits.length > 0 && <p className="num mt-1.5 text-[13px] text-stone-500">{plural(outfits.length, 'outfit')}</p>}
         </div>
         <div className="mt-1 flex shrink-0 gap-2">
           {outfits.length > 0 && (
@@ -50,37 +50,36 @@ export function OutfitsView() {
       {loading ? (
         <Spinner />
       ) : outfits.length === 0 ? (
-        <div className="mx-auto mt-14 max-w-sm text-center">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-light text-accent">
-            <LayersIcon size={28} />
-          </span>
-          <h2 className="mt-6 font-display text-2xl font-semibold">No outfits yet</h2>
-          <p className="mt-2 text-stone-500">
-            {items.length
-              ? 'Combine pieces from your wardrobe into outfits, or let Shuffle suggest one.'
-              : 'Add a few clothes to your wardrobe first, then combine them into outfits here.'}
-          </p>
-          {items.length > 0 && (
-            <button className="btn-primary mt-6" onClick={() => setBuilding('new')}>
-              <PlusIcon size={18} /> Create an outfit
-            </button>
-          )}
-        </div>
+        <EmptyState
+          icon={<LayersIcon size={26} />}
+          title="No outfits yet"
+          actions={
+            items.length > 0 && (
+              <button className="btn-primary" onClick={() => setBuilding('new')}>
+                <PlusIcon size={18} /> Create an outfit
+              </button>
+            )
+          }
+        >
+          {items.length
+            ? 'Combine pieces from your wardrobe into outfits, or let Shuffle suggest one.'
+            : 'Add a few clothes to your wardrobe first, then combine them into outfits here.'}
+        </EmptyState>
       ) : (
-        <ul className="mt-6 grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
-          {sorted.map((o) => (
-            <li key={o.id}>
+        <ul className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4">
+          {sorted.map((o, i) => (
+            <li key={o.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 12) * 35}ms` }}>
               <button className="group block w-full text-left" onClick={() => setOpenId(o.id)}>
-                <div className="relative transition group-hover:opacity-95">
+                <div className="relative">
                   <OutfitCollage items={itemsOf(o)} />
                   {tracked(o) && o.wornOn.includes(today()) && (
-                    <span className="absolute bottom-2 left-2 rounded-full bg-ink/80 px-2 py-0.5 text-[11px] font-medium text-white">
+                    <span className="absolute bottom-2 left-2 rounded-full bg-ink/75 px-2.5 py-1 text-[11px] font-medium leading-none text-white backdrop-blur">
                       Worn today
                     </span>
                   )}
                 </div>
-                <p className="mt-2 truncate text-sm font-medium">{o.name}</p>
-                <p className="text-xs text-stone-500">
+                <p className="mt-2.5 truncate px-0.5 text-[14px] font-medium">{o.name}</p>
+                <p className="num mt-0.5 px-0.5 text-xs text-stone-500">
                   {plural(o.itemIds.length, 'piece')}
                   {tracked(o) && <> · {o.wornOn.length ? `worn ${o.wornOn.length}×` : 'not worn yet'}</>}
                   {o.sample && ' · sample'}
@@ -136,7 +135,7 @@ function OutfitDetail({
       onClose={onClose}
       footer={
         <div className="flex gap-2">
-          <button className="icon-btn h-11 w-11 bg-stone-100 text-stone-600 hover:bg-red-50 hover:text-red-600" onClick={remove} aria-label="Delete outfit">
+          <button className="icon-btn bg-white shadow-card text-stone-600 hover:bg-red-50 hover:text-red-600" onClick={remove} aria-label="Delete outfit">
             <TrashIcon size={18} />
           </button>
           <button className={`btn-ghost ${trackWear ? '' : 'flex-1'}`} onClick={onEdit}>
@@ -157,7 +156,7 @@ function OutfitDetail({
       }
     >
       {trackWear && (
-        <p className="-mt-1 mb-4 text-sm text-stone-500">
+        <p className="num -mt-1 mb-4 text-[13px] text-stone-500">
           {describeLastWorn(outfit.wornOn)}
           {outfit.wornOn.length > 0 && <> · worn {plural(outfit.wornOn.length, 'time')}</>}
         </p>

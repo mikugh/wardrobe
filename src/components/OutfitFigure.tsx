@@ -28,7 +28,7 @@ export function OutfitFigure({ items }: { items: ClothingItem[] }) {
   const extras = rows.find((r) => r.zone === 'extras')
 
   return (
-    <div className="rounded-3xl bg-white px-4 py-5 ring-1 ring-stone-200">
+    <div className="rounded-3xl bg-white px-4 py-5 shadow-card">
       <div className="flex flex-col items-center gap-2">
         {body.map((r) => (
           <Row key={r.zone} zone={r.zone} items={r.items} />
@@ -126,7 +126,7 @@ export function Piece({ item, full = false }: { item: ClothingItem; full?: boole
       <BlobImg blob={full ? item.image : item.thumb} alt={item.name} className="h-full w-full object-contain drop-shadow-md" />
     </div>
   ) : (
-    <div className="aspect-[3/4] h-full min-w-0 overflow-hidden rounded-2xl bg-stone-100 ring-1 ring-black/5">
+    <div className="aspect-[3/4] h-full min-w-0 overflow-hidden rounded-2xl bg-sand ring-1 ring-black/[0.04]">
       <BlobImg blob={item.thumb} alt={item.name} className="h-full w-full object-cover" />
     </div>
   )
