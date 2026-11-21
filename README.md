@@ -60,15 +60,33 @@ The app is deployed on Vercel at https://wardrobe-psi-ten.vercel.app/. The Verce
 
 ### Access key
 
-The deployed app only opens for people with the access key. `middleware.ts` (Vercel Routing Middleware) checks every page request:
+The app opens only for people with the access key. The check is in `access-key.js`. The Vercel deployment runs it through `middleware.ts`, and `npm run serve` runs it too.
 
-- Open the app once as `https://wardrobe-psi-ten.vercel.app/?key=<key>`. The key is then kept in a cookie for a year, so later visits work without it.
-- Use **Add to Home Screen** from that link. The installed app gets the key through the manifest's `start_url`, because installed apps on iPhones keep their own cookies, separate from Safari's.
-- Anyone without the key sees a "Private wardrobe" page.
+**Create the key** (once), in the project root:
 
-The key is the `WARDROBE_ACCESS_KEY` environment variable in the Vercel project (Settings → Environment Variables, Production). If it isn't set, nobody gets in. To change the key, change the variable and redeploy; everyone then needs the new link. Keep the key out of git: put a local copy in `.env.local`, which is ignored.
+```bash
+python -c "import secrets, pathlib; pathlib.Path('access_key.txt').write_text(secrets.token_urlsafe(18))"
+```
 
-The middleware runs only on Vercel. `npm run dev` and `npm run serve` stay open. The built files in `assets/` and the icon aren't checked; they're the app's code, which is public on GitHub anyway.
+`access_key.txt` is git-ignored, so it never reaches GitHub or Vercel. The app reads the key from the `APP_ACCESS_KEY` environment variable first, then from `access_key.txt`. With neither, the app stays unlocked; that's how `npm run dev` works.
+
+**On Vercel**, add the key as a sensitive environment variable, read straight from the file. You need the Vercel CLI (`npm i -g vercel`, then `vercel link` in this folder). Redeploy afterwards:
+
+```bash
+vercel env add APP_ACCESS_KEY production --sensitive < access_key.txt
+```
+
+If `APP_ACCESS_KEY` isn't set on Vercel, the deployed app is open to anyone.
+
+**Using it:**
+
+- Open the app once as `https://wardrobe-psi-ten.vercel.app/?key=<key>`. The key is stored in an HttpOnly cookie for a year, and you're sent on to the plain address, so the key doesn't stay in the address bar or the history. After that, the plain address works in that browser.
+- Use **Add to Home Screen** after that first visit. The installed app gets the key through the manifest's `start_url`, because installed apps on iPhones keep their own cookies, separate from Safari's.
+- Without the key, pages show "Ask the person who runs this for your personal link." and `/api/` routes get a JSON error (401).
+
+**Change the key:** create a new `access_key.txt` with the command above, replace the variable on Vercel (`vercel env rm APP_ACCESS_KEY production`, then the `vercel env add` command again) and redeploy. `npm run serve` picks up the new file without a restart. Everyone then needs the new link; old cookies stop working.
+
+Only the app icon (`icon.svg`) isn't checked, because phones fetch it for the home screen without the cookie. There are no scheduled jobs, webhooks or other automated paths to exempt.
 
 Data isn't shared between devices or people: each browser keeps its own wardrobe. Items added on `localhost` or on `npm run serve` don't appear on the Vercel URL. Move them with **Settings → Backup** and **Restore**.
 

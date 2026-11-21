@@ -3,7 +3,8 @@
 // WARDROBE_HOST and WARDROBE_PORT change where it listens.
 import { createServer } from 'node:http';
 import { createReadStream } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
+import { DENIED_HTML, DENIED_JSON, checkAccess, manifestWithKey, readAccessKey } from './access-key.js';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,11 +30,44 @@ createServer(async (req, res) => {
     res.writeHead(405, { Allow: 'GET, HEAD' }).end();
     return;
   }
+  // Access-key lock (see access-key.js). Read on every request, so a new key needs no restart.
+  const key = readAccessKey();
+  let decision;
+  try {
+    decision = checkAccess({ url: new URL(req.url, `http://${req.headers.host || 'localhost'}`).href, headers: req.headers }, key);
+  } catch {
+    res.writeHead(400).end();
+    return;
+  }
+  if (decision.action === 'redirect') {
+    res.writeHead(302, { Location: decision.location, 'Set-Cookie': decision.setCookie, 'Cache-Control': 'no-store' }).end();
+    return;
+  }
+  if (decision.action === 'deny') {
+    res
+      .writeHead(401, {
+        'Content-Type': decision.json ? 'application/json' : 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store',
+      })
+      .end(req.method === 'HEAD' ? undefined : decision.json ? DENIED_JSON : DENIED_HTML);
+    return;
+  }
+
   let path;
   try {
     path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   } catch {
     res.writeHead(400).end();
+    return;
+  }
+  if (key && path === '/manifest.json') {
+    try {
+      const manifest = manifestWithKey(JSON.parse(await readFile(join(root, 'manifest.json'), 'utf8')), key);
+      res.writeHead(200, { 'Content-Type': 'application/manifest+json', 'Cache-Control': 'private, no-store' });
+      res.end(req.method === 'HEAD' ? undefined : JSON.stringify(manifest));
+    } catch {
+      res.writeHead(404).end();
+    }
     return;
   }
   if (path.endsWith('/')) path += 'index.html';

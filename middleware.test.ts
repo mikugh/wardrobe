@@ -1,67 +1,115 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import middleware, { COOKIE, config } from './middleware'
+import { COOKIE, checkAccess, readAccessKey, sameKey } from './access-key.js'
+import middleware, { config } from './middleware'
 
-const KEY = 'test-key-123'
-const req = (path: string, cookie?: string) =>
-  new Request(`https://wardrobe.example${path}`, { headers: cookie ? { cookie } : {} })
+const KEY = 'test-key-AbC_123-xyz'
+const req = (path: string, { cookie, accept }: { cookie?: string; accept?: string } = {}) =>
+  new Request(`https://wardrobe.example${path}`, {
+    headers: { ...(cookie ? { cookie } : {}), ...(accept ? { accept } : {}) },
+  })
+const HTML = 'text/html,application/xhtml+xml'
 
 // next() marks "continue to the app" with this header.
 const passes = (res: Response) => res.headers.get('x-middleware-next') === '1'
 
-describe('access key middleware', () => {
+describe('access key lock (Vercel middleware)', () => {
   beforeEach(() => {
-    process.env.WARDROBE_ACCESS_KEY = KEY
+    process.env.APP_ACCESS_KEY = KEY
   })
   afterEach(() => {
-    delete process.env.WARDROBE_ACCESS_KEY
+    delete process.env.APP_ACCESS_KEY
   })
 
-  it('refuses visitors without the key', async () => {
-    const res = middleware(req('/'))
+  it('answers 401 with a plain page when there is no key', async () => {
+    const res = middleware(req('/', { accept: HTML }))
     expect(res.status).toBe(401)
-    expect(passes(res)).toBe(false)
-    expect(await res.text()).toContain('Private wardrobe')
+    expect(res.headers.get('content-type')).toContain('text/html')
+    expect(await res.text()).toContain('Ask the person who runs this for your personal link.')
   })
 
-  it('refuses a wrong key, in the address or the cookie', () => {
-    expect(middleware(req('/?key=nope')).status).toBe(401)
-    expect(middleware(req('/', `${COOKIE}=nope`)).status).toBe(401)
-    expect(middleware(req('/?key=test-key-12')).status).toBe(401)
+  it('answers 401 with JSON for an API route when there is no key', async () => {
+    const res = middleware(req('/api/items'))
+    expect(res.status).toBe(401)
+    expect(res.headers.get('content-type')).toContain('application/json')
+    expect(await res.json()).toMatchObject({ error: 'unauthorized' })
   })
 
-  it('lets the key in the address through and remembers it in a cookie', () => {
-    const res = middleware(req(`/?key=${KEY}`))
-    expect(passes(res)).toBe(true)
+  it('answers 401 to a wrong key, in the address or the cookie', () => {
+    expect(middleware(req('/?key=nope', { accept: HTML })).status).toBe(401)
+    expect(middleware(req(`/?key=${KEY}x`, { accept: HTML })).status).toBe(401)
+    expect(middleware(req('/', { cookie: `${COOKIE}=nope` })).status).toBe(401)
+  })
+
+  it('stores the right key in an HttpOnly cookie and redirects to the address without it', () => {
+    const res = middleware(req(`/outfits?tab=2&key=${KEY}`, { accept: HTML }))
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toBe('/outfits?tab=2')
     const cookie = res.headers.get('set-cookie') ?? ''
-    expect(cookie).toContain(`${COOKIE}=${KEY}`)
+    expect(cookie).toContain(`${COOKIE}=${encodeURIComponent(KEY)}`)
     expect(cookie).toContain('HttpOnly')
+    expect(cookie).toContain('SameSite=Lax')
+    expect(cookie).toContain(`Max-Age=${60 * 60 * 24 * 365}`)
     expect(cookie).toContain('Secure')
   })
 
-  it('lets a visitor with the cookie through', () => {
-    expect(passes(middleware(req('/', `other=1; ${COOKIE}=${KEY}`)))).toBe(true)
+  it('lets a page and an API route through with the cookie', () => {
+    const cookie = `other=1; ${COOKIE}=${encodeURIComponent(KEY)}`
+    expect(passes(middleware(req('/', { cookie, accept: HTML })))).toBe(true)
+    expect(passes(middleware(req('/api/items', { cookie })))).toBe(true)
   })
 
-  it('refuses everyone when no key is configured', () => {
-    delete process.env.WARDROBE_ACCESS_KEY
-    expect(middleware(req('/?key=')).status).toBe(401)
-    expect(middleware(req('/?key=anything')).status).toBe(401)
-  })
-
-  it('serves the manifest with the key in start_url, so the installed app gets in', async () => {
-    const res = middleware(req('/manifest.json', `${COOKIE}=${KEY}`))
+  it('serves the manifest with the key in start_url, so the home-screen app gets in', async () => {
+    const res = middleware(req('/manifest.json', { cookie: `${COOKIE}=${encodeURIComponent(KEY)}` }))
     expect(res.status).toBe(200)
-    expect(res.headers.get('content-type')).toContain('manifest+json')
     const body = await res.json()
-    expect(body.start_url).toBe(`./?key=${KEY}`)
+    expect(body.start_url).toBe(`./?key=${encodeURIComponent(KEY)}`)
     expect(body.name).toBe('Wardrobe')
   })
 
-  it('does not run on built assets or the icon', () => {
+  it('checks every path except the app icon', () => {
     const matches = (p: string) => new RegExp(`^${config.matcher}$`).test(p)
-    expect(matches('/')).toBe(true)
-    expect(matches('/manifest.json')).toBe(true)
-    expect(matches('/assets/index-abc.js')).toBe(false)
+    for (const p of ['/', '/index.html', '/manifest.json', '/assets/index-abc.js', '/api/items']) expect(matches(p)).toBe(true)
     expect(matches('/icon.svg')).toBe(false)
+  })
+})
+
+describe('access key lock (shared logic)', () => {
+  it('lets only the app icon through without the key', () => {
+    expect(checkAccess({ url: 'https://wardrobe.example/icon.svg', headers: {} }, KEY)).toEqual({ action: 'pass' })
+    expect(checkAccess({ url: 'https://wardrobe.example/icon.svg.js', headers: {} }, KEY).action).toBe('deny')
+  })
+
+  it('leaves the app unlocked when no key is configured', () => {
+    expect(checkAccess({ url: 'http://localhost:5180/', headers: {} }, null)).toEqual({ action: 'pass' })
+  })
+
+  it('leaves out Secure on plain http, and adds it behind an https proxy', () => {
+    const plain = checkAccess({ url: `http://127.0.0.1:5180/?key=${KEY}`, headers: {} }, KEY)
+    expect(plain).toMatchObject({ action: 'redirect', location: '/' })
+    expect(plain.action === 'redirect' && plain.setCookie).not.toContain('Secure')
+    const proxied = checkAccess({ url: `http://127.0.0.1:5180/?key=${KEY}`, headers: { 'x-forwarded-proto': 'https' } }, KEY)
+    expect(proxied.action === 'redirect' && proxied.setCookie).toContain('Secure')
+  })
+
+  it('compares keys exactly', () => {
+    expect(sameKey(KEY, KEY)).toBe(true)
+    expect(sameKey(KEY.slice(0, -1), KEY)).toBe(false)
+    expect(sameKey('', KEY)).toBe(false)
+    expect(sameKey(null, KEY)).toBe(false)
+  })
+
+  it('reads the key from the env var first, then from the file', () => {
+    const readFile = () => 'key-from-file\n'
+    expect(readAccessKey({ env: { APP_ACCESS_KEY: 'key-from-env' }, readFile })).toBe('key-from-env')
+    expect(readAccessKey({ env: {}, readFile })).toBe('key-from-file')
+    expect(readAccessKey({ env: { APP_ACCESS_KEY: '  ' }, readFile })).toBe('key-from-file')
+  })
+
+  it('returns null, meaning unlocked, when neither is set', () => {
+    const missing = () => {
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' })
+    }
+    expect(readAccessKey({ env: {}, readFile: missing })).toBeNull()
+    expect(readAccessKey({ env: {}, readFile: () => '' })).toBeNull()
   })
 })

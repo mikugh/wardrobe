@@ -3,5 +3,6 @@ node_modules/
 dist/
 .claude/
 
-# Local secrets (the Vercel access key lives here, never in git)
+# Local secrets: the access key never goes into git
 .env*.local
+access_key.txt
