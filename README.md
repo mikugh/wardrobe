@@ -58,6 +58,18 @@ GitHub Actions runs the tests and the build on every push to `main` and on pull 
 
 The app is deployed on Vercel at https://wardrobe-psi-ten.vercel.app/. The Vercel project is connected to this GitHub repo, so every push to `main` builds and deploys a new version automatically. Vercel detects Vite and needs no extra settings or environment variables.
 
+### Access key
+
+The deployed app only opens for people with the access key. `middleware.ts` (Vercel Routing Middleware) checks every page request:
+
+- Open the app once as `https://wardrobe-psi-ten.vercel.app/?key=<key>`. The key is then kept in a cookie for a year, so later visits work without it.
+- Use **Add to Home Screen** from that link. The installed app gets the key through the manifest's `start_url`, because installed apps on iPhones keep their own cookies, separate from Safari's.
+- Anyone without the key sees a "Private wardrobe" page.
+
+The key is the `WARDROBE_ACCESS_KEY` environment variable in the Vercel project (Settings → Environment Variables, Production). If it isn't set, nobody gets in. To change the key, change the variable and redeploy; everyone then needs the new link. Keep the key out of git: put a local copy in `.env.local`, which is ignored.
+
+The middleware runs only on Vercel. `npm run dev` and `npm run serve` stay open. The built files in `assets/` and the icon aren't checked; they're the app's code, which is public on GitHub anyway.
+
 Data isn't shared between devices or people: each browser keeps its own wardrobe. Items added on `localhost` or on `npm run serve` don't appear on the Vercel URL. Move them with **Settings → Backup** and **Restore**.
 
 ## Run it from this computer

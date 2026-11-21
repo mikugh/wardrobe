@@ -2,3 +2,6 @@ node_modules/
 # Build output (rebuild with `npm run build`)
 dist/
 .claude/
+
+# Local secrets (the Vercel access key lives here, never in git)
+.env*.local
