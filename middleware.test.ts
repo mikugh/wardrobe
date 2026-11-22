@@ -1,3 +1,5 @@
+import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { COOKIE, checkAccess, readAccessKey, sameKey } from './access-key.js'
 import middleware, { config } from './middleware'
@@ -111,5 +113,27 @@ describe('access key lock (shared logic)', () => {
     }
     expect(readAccessKey({ env: {}, readFile: missing })).toBeNull()
     expect(readAccessKey({ env: {}, readFile: () => '' })).toBeNull()
+  })
+})
+
+// Vitest loads files through Vite, which handles JSON and other imports itself, so the tests above
+// pass even when Node can't load the middleware. Vercel runs it in plain Node, so load it there too.
+// (A JSON import without `with { type: 'json' }` once broke every request on Vercel this way.)
+describe('middleware in plain Node, as Vercel runs it', () => {
+  it('loads and answers a request without the key with 401', () => {
+    const script = `
+      const { default: middleware } = await import('./middleware.ts')
+      const res = middleware(new Request('https://wardrobe.example/'))
+      console.log('status=' + res.status)
+    `
+    const run = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
+      cwd: fileURLToPath(new URL('.', import.meta.url)),
+      env: { ...process.env, APP_ACCESS_KEY: KEY },
+      encoding: 'utf8',
+      timeout: 20_000,
+    })
+    expect(run.stderr.split('\n').filter((l) => l && !/ExperimentalWarning|--trace-warnings/.test(l))).toEqual([])
+    expect(run.stdout.trim()).toBe('status=401')
+    expect(run.status).toBe(0)
   })
 })
