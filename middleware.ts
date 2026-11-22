@@ -6,7 +6,8 @@
 
 import { next } from '@vercel/functions'
 import { DENIED_HTML, DENIED_JSON, checkAccess, manifestWithKey, readAccessKey } from './access-key.js'
-import manifest from './public/manifest.json'
+// Vercel runs this as a native ES module, and Node only imports JSON with this attribute.
+import manifest from './public/manifest.json' with { type: 'json' }
 
 export const config = {
   runtime: 'nodejs',
